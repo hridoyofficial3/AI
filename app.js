@@ -282,12 +282,21 @@ two($('#wp'),'সব মুছুন',()=>{S.notes=[];S.pend=[];save();notes();p
 $('#sn').value=S.name;$('#sk').value=S.key;$('#sm').value=S.model;$('#gk').value=S.gkey;$('#gm').value=S.gmodel;$('#sd').checked=S.share;$('#sp').value=S.prov;
 function provUI(){const g=$('#sp').value==='gemini';$('#g-g').hidden=!g;$('#g-c').hidden=g}
 $('#sp').onchange=provUI;provUI();
+function flash(msg,ok){const x=$('#sx'),b=$('#ss');x.textContent=msg;
+ const t=h('div',{role:'status'},msg);
+ t.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);max-width:88%;padding:12px 18px;border-radius:14px;font-weight:700;text-align:center;z-index:9999;box-shadow:0 6px 24px #0008;background:'+(ok?'var(--ac)':'#b3261e')+';color:'+(ok?'var(--acx)':'#fff');
+ document.body.append(t);setTimeout(()=>t.remove(),3200);
+ if(!b.dataset.l)b.dataset.l=b.textContent;b.textContent=ok?'✓ সংরক্ষিত':'✕ হয়নি';setTimeout(()=>{b.textContent=b.dataset.l},2000)}
 $('#ss').onclick=()=>{const k=$('#sk').value.trim(),gk=$('#gk').value.trim(),m=$('#sm').value.trim()||'claude-sonnet-5',gm=$('#gm').value.trim()||'gemini-3.5-flash-lite',x=$('#sx');
- if(k&&!/^sk-ant-[\w-]{10,}$/.test(k)){x.textContent='Claude key-এর ধরন ঠিক নেই।';return}
- if(gk&&!/^(?:AIza|AQ\.)[\w.\-]{20,}$/.test(gk)){x.textContent='Gemini key-এর ধরন ঠিক নেই।';return}
- if(!/^[a-z0-9.\-]{3,60}$/.test(m)||!/^[a-z0-9.\-]{3,60}$/.test(gm)){x.textContent='মডেলের নাম ঠিক নেই।';return}
- S.name=$('#sn').value.trim().slice(0,40)||S.name;S.key=k;S.gkey=gk;S.model=m;S.gmodel=gm;S.prov=$('#sp').value;S.share=$('#sd').checked;save();chrome();x.textContent='সংরক্ষিত হয়েছে।'};
-$('#kc').onclick=()=>{if($('#sp').value==='gemini'){S.gkey='';$('#gk').value=''}else{S.key='';$('#sk').value=''}save();$('#sx').textContent='key মুছে ফেলা হয়েছে।'};
+ if(k&&!/^sk-ant-[\w-]{10,}$/.test(k)){flash('Claude key-এর ধরন ঠিক নেই।',false);return}
+ if(gk){const bad=gk.search(/[^\x21-\x7e]/);if(gk.length<20||bad>=0){flash('Gemini key ঠিক নেই (সংস্করণ ১১): দৈর্ঘ্য '+gk.length+', শুরু "'+gk.slice(0,3)+'"'+(bad>=0?', '+(bad+1)+' নম্বর অক্ষরটি অচেনা (ফাঁকা জায়গা বা অন্য অক্ষর)':'')+'।',false);return}}
+ if(!/^[a-z0-9.\-]{3,60}$/.test(m)||!/^[a-z0-9.\-]{3,60}$/.test(gm)){flash('মডেলের নাম ঠিক নেই।',false);return}
+ S.name=$('#sn').value.trim().slice(0,40)||S.name;S.key=k;S.gkey=gk;S.model=m;S.gmodel=gm;S.prov=$('#sp').value;S.share=$('#sd').checked;save();chrome();
+ let ok=false;try{const j=JSON.parse(localStorage.getItem('ams2')||'{}');ok=j.gkey===S.gkey&&j.key===S.key&&j.model===S.model}catch(e){}
+ if(!ok){flash('ফোনে সংরক্ষণ করা যায়নি (ব্রাউজারের স্টোরেজ বন্ধ বা ভরা)।',false);return}
+ const pn=S.prov==='gemini'?'Gemini':'Claude',has=S.prov==='gemini'?S.gkey:S.key;
+ flash('সংরক্ষিত হয়েছে। '+(has?pn+' key আছে।':'এখনো কোনো key নেই।')+(has&&!S.online?' Heart মোডে নোটে না পেলে '+pn+'-কে জিজ্ঞেস করবে।':''),true)};
+$('#kc').onclick=()=>{if($('#sp').value==='gemini'){S.gkey='';$('#gk').value=''}else{S.key='';$('#sk').value=''}save();flash('key মুছে ফেলা হয়েছে।',true)};
 $('#c1').onclick=()=>{tab('notes');dr(true);setTimeout(()=>$('#nt').focus(),250)};$('#c2').onclick=()=>$('#q').focus();
 if(S.key&&!S.gkey&&S.prov==='gemini')S.prov='claude',$('#sp').value='claude',provUI();
 const mq=matchMedia('(prefers-color-scheme: dark)');
