@@ -284,7 +284,7 @@ function provUI(){const g=$('#sp').value==='gemini';$('#g-g').hidden=!g;$('#g-c'
 $('#sp').onchange=provUI;provUI();
 $('#ss').onclick=()=>{const k=$('#sk').value.trim(),gk=$('#gk').value.trim(),m=$('#sm').value.trim()||'claude-sonnet-5',gm=$('#gm').value.trim()||'gemini-3.5-flash-lite',x=$('#sx');
  if(k&&!/^sk-ant-[\w-]{10,}$/.test(k)){x.textContent='Claude key-এর ধরন ঠিক নেই।';return}
- if(gk&&!/^AIza[\w-]{20,}$/.test(gk)){x.textContent='Gemini key-এর ধরন ঠিক নেই।';return}
+ if(gk&&!/^(?:AIza|AQ\.)[\w.\-]{20,}$/.test(gk)){x.textContent='Gemini key-এর ধরন ঠিক নেই।';return}
  if(!/^[a-z0-9.\-]{3,60}$/.test(m)||!/^[a-z0-9.\-]{3,60}$/.test(gm)){x.textContent='মডেলের নাম ঠিক নেই।';return}
  S.name=$('#sn').value.trim().slice(0,40)||S.name;S.key=k;S.gkey=gk;S.model=m;S.gmodel=gm;S.prov=$('#sp').value;S.share=$('#sd').checked;save();chrome();x.textContent='সংরক্ষিত হয়েছে।'};
 $('#kc').onclick=()=>{if($('#sp').value==='gemini'){S.gkey='';$('#gk').value=''}else{S.key='';$('#sk').value=''}save();$('#sx').textContent='key মুছে ফেলা হয়েছে।'};
