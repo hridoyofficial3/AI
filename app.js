@@ -16,8 +16,20 @@ function two(b,l,fn){let a=false;b.textContent=l;b.onclick=()=>{if(a){fn();retur
 
 /* header / hero */
 function chrome(){$('#hi').textContent='আজ কী শেখাবেন, '+(S.name||'').trim().split(' ')[0]+'?';$('#av').textContent=(S.name||'ই').trim()[0];
- $('#ai').checked=S.online}
-$('#ai').onchange=e=>{S.online=e.target.checked;save()};
+ $('#mbtn').firstChild.textContent=!S.online?'Heart':(S.prov==='gemini'?'Gemini':'Claude')}
+const PROVS=[{id:'heart',label:'Heart',sub:'শুধু নোট, নেট ছাড়াও চলে'},{id:'gemini',label:'Gemini',sub:'Google, key লাগবে'},{id:'claude',label:'Claude',sub:'Anthropic, key লাগবে'}];
+function menuOpen(o){$('#mmenu').hidden=!o;$('#mbtn').setAttribute('aria-expanded',o)}
+function renderMenu(){const cur=!S.online?'heart':S.prov,m=$('#mmenu');m.replaceChildren();
+ PROVS.forEach(p=>{const has=p.id==='heart'||( p.id==='gemini'?S.gkey:S.key);
+  const it=h('button',{class:'mitem','aria-current':p.id===cur},
+   h('span',{},h('span',{class:'mi-name'},p.label),h('span',{class:'mi-sub'},has?(p.id==='heart'?p.sub:'সংযুক্ত'):'key যোগ করুন')));
+  if(p.id===cur)it.append(svgi(['M20 6 9 17l-5-5'],'mi-ck'));
+  it.onclick=()=>{if(p.id==='heart'){S.online=false}else if(!has){menuOpen(false);tab('set');dr(true);setTimeout(()=>$(p.id==='gemini'?'#gk':'#sk').focus(),300);return}
+   else{S.online=true;S.prov=p.id}
+   save();chrome();menuOpen(false)};
+  m.append(it)})}
+$('#mbtn').onclick=()=>{const o=$('#mmenu').hidden;if(o)renderMenu();menuOpen(o)};
+document.addEventListener('click',e=>{if(!$('#mmenu').hidden&&!e.target.closest('.mwrap'))menuOpen(false)});
 function newChat(){hist=[];pq=null;$('#chat').replaceChildren();$('#hero').hidden=false;$('#q').focus()}
 $('#nw').onclick=newChat;$('#nc').onclick=()=>{newChat();dr(false)};
 
@@ -220,6 +232,6 @@ if(S.key&&!S.gkey&&S.prov==='gemini')S.prov='claude',$('#sp').value='claude',pro
 const mq=matchMedia('(prefers-color-scheme: dark)');
 function theme(){const t=S.theme||(mq.matches?'night':'day');document.documentElement.dataset.theme=t;document.querySelector('meta[name=theme-color]').content=t==='night'?'#0b1a16':'#f6f8f3'}
 $('#th').onclick=()=>{S.theme=document.documentElement.dataset.theme==='night'?'day':'night';save();theme()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')dr(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){dr(false);menuOpen(false)}});
 theme();chrome();notes();pend();tab('notes');
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
